@@ -1,4 +1,5 @@
 import pprint
+
 import requests
 
 URL = "https://api.belpost.by/api/v1/tracking"
