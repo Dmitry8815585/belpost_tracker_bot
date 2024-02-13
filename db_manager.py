@@ -34,7 +34,7 @@ def create_user(chat_id, username, first_name):
         connection.close()
 
 
-def create_track(track, user_id):
+def create_track(track, user_id, response_data):
     """Adding track data to DB."""
     try:
         connection = sqlite3.connect('belpost_tracker.db')
@@ -57,18 +57,20 @@ def create_track(track, user_id):
         )
         row = cursor.fetchone()
 
+        response_data_json = json.dumps(response_data)
+
         connection.execute(
             '''
-            INSERT INTO tracks (track, user_id, date_added)
-            VALUES (?, ?, datetime("now"))
+            INSERT INTO tracks (track, data, user_id, date_added)
+            VALUES (?, ?, ?, datetime("now"))
             ''',
-            (track, row[0])
+            (track, response_data_json, row[0])
         )
         connection.commit()
-        return True
+        return True, "Data added to the database successfully!"
 
     except sqlite3.IntegrityError:
-        return False
+        return False, "Track already being tracked!"
 
     finally:
         connection.close()

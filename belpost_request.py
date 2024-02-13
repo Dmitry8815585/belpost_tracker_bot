@@ -1,9 +1,13 @@
+import os
 import pprint
+from dotenv import load_dotenv
 
 import requests
 
-URL = "https://api.belpost.by/api/v1/tracking"
-TRACKER = 'BV280488510BY'
+load_dotenv()
+
+URL = os.getenv('URL')
+TRACKER = os.getenv('TRACKER')
 
 
 def get_data(tracker):
@@ -42,7 +46,10 @@ def get_data(tracker):
 
 
 def main():
-    pprint.pprint(get_data(TRACKER))
+    r = get_data('BV280488510BY')
+    pprint.pprint(r)
+
+    print(r[-1].get('event'))
 
 
 if __name__ == "__main__":
