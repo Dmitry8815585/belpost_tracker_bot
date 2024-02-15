@@ -6,6 +6,7 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 from db_manager import create_track, create_user
 from belpost_request import get_data
+from test_json import data
 
 load_dotenv()
 
@@ -15,6 +16,7 @@ updater = Updater(token=os.getenv('TOKEN'))
 
 
 def send_message(chat_id, message):
+    """Send message response."""
     bot.send_message(chat_id, message)
 
 
@@ -41,56 +43,45 @@ def get_status(update, context):
     chat_id = message.chat_id
     text = (message.text).upper()
 
-    response_data = get_data(text)  # Get data
+    response_data = data
+    # response_data = get_data(text)  # Get data
 
     if isinstance(response_data, list):
 
         if response_data[-1].get('event') == 'Вручено':
-            context.bot.send_message(
-                    chat_id=chat_id, text='Посылка вручена!'
-                )
+            send_message(chat_id=chat_id, message='Посылка вручена!')
 
             for i in response_data:
                 response_message = (
                     f"{i.get('created_at')}\n"
                     f"{i.get('event')}\n{i.get('place')}"
                 )
-                context.bot.send_message(
-                    chat_id=chat_id, text=response_message
-                )
+                send_message(chat_id=chat_id, message=response_message)
         else:
             success, response_message = create_track(
                 text, chat_id, response_data
             )
 
             if success:
-                context.bot.send_message(
-                    chat_id=chat_id, text=response_message
-                )
-                for i in response_data:
-                    response_message = (
-                        f"{i.get('created_at')}\n"
-                        f"{i.get('event')}\n{i.get('place')}"
-                    )
-                    context.bot.send_message(
-                        chat_id=chat_id, text=response_message
-                    )
-            else:
-                context.bot.send_message(
-                    chat_id=chat_id, text=response_message
-                )
+                send_message(chat_id=chat_id, message=response_message)
 
                 for i in response_data:
                     response_message = (
                         f"{i.get('created_at')}\n"
                         f"{i.get('event')}\n{i.get('place')}"
                     )
-                    context.bot.send_message(
-                        chat_id=chat_id, text=response_message
+                    send_message(chat_id=chat_id, message=response_message)
+            else:
+                send_message(chat_id=chat_id, message=response_message)
+
+                for i in response_data:
+                    response_message = (
+                        f"{i.get('created_at')}\n"
+                        f"{i.get('event')}\n{i.get('place')}"
                     )
+                    send_message(chat_id=chat_id, message=response_message)
     else:
-        response_message = response_data
-        context.bot.send_message(chat_id=chat_id, text=response_message)
+        send_message(chat_id=chat_id, message=response_data)
 
 
 updater.dispatcher.add_handler(CommandHandler('start', wake_up))

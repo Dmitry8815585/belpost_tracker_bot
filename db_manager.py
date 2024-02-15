@@ -1,7 +1,10 @@
+from datetime import datetime
 import json
 import sqlite3
 
-from test_json import data
+import pytz
+
+# from test_json import data
 
 
 def create_user(chat_id, username, first_name):
@@ -59,15 +62,18 @@ def create_track(track, user_id, response_data):
 
         response_data_json = json.dumps(response_data)
 
+        minsk_tz = pytz.timezone('Europe/Minsk')
+        current_time = datetime.now(minsk_tz)
+
         connection.execute(
             '''
             INSERT INTO tracks (track, data, user_id, date_added)
-            VALUES (?, ?, ?, datetime("now"))
+            VALUES (?, ?, ?, ?)
             ''',
-            (track, response_data_json, row[0])
+            (track, response_data_json, row[0], current_time)
         )
         connection.commit()
-        return True, "Data added to the database successfully!"
+        return True, "The track has been successfully added to the database!"
 
     except sqlite3.IntegrityError:
         return False, "Track already being tracked!"
@@ -76,7 +82,7 @@ def create_track(track, user_id, response_data):
         connection.close()
 
 
-def update_track_data(track, new_data):
+def update_track_data(track, new_data, is_active):
     """Update track data in DB."""
     try:
         connection = sqlite3.connect('belpost_tracker.db')
@@ -85,12 +91,16 @@ def update_track_data(track, new_data):
         serialized_new_data = json.dumps(new_data)
 
         cursor.execute(
-            'UPDATE tracks SET data = ? WHERE track = ?',
-            (serialized_new_data, track)
+            '''
+            UPDATE tracks SET
+            data = ?,
+            is_active = ?
+            WHERE track = ?
+            ''',
+            (serialized_new_data, is_active, track)
         )
 
         connection.commit()
-        print(f"Data of {track} is update!")
         return True
 
     except sqlite3.IntegrityError:
@@ -136,8 +146,25 @@ def get_value_from_db(text: str) -> list:
     return json.loads(data[0])
 
 
+def get_chat_id(text: str) -> list:
+    """Return chat_id using track."""
+    connection = sqlite3.connect('belpost_tracker.db')
+    cursor = connection.cursor()
+
+    cursor.execute(
+            'SELECT user_id FROM tracks WHERE track = ?', (text,)
+    )
+    user_id = cursor.fetchone()
+
+    cursor.execute(
+        'SELECT chat_id FROM users WHERE user_id = ?', user_id
+    )
+
+    return cursor.fetchone()[0]
+
+
 def main():
-    update_track_data('FIRST', data)
+    print(get_chat_id('NEWDATA'))
 
 
 if __name__ == "__main__":
