@@ -4,8 +4,6 @@ import sqlite3
 
 import pytz
 
-# from test_json import data
-
 
 def create_user(chat_id, username, first_name):
     """Adding new user to DB using data from message."""
@@ -146,7 +144,7 @@ def get_value_from_db(text: str) -> list:
     return json.loads(data[0])
 
 
-def get_chat_id(text: str) -> list:
+def get_chat_id(text: str):
     """Return chat_id using track."""
     connection = sqlite3.connect('belpost_tracker.db')
     cursor = connection.cursor()
