@@ -6,6 +6,8 @@ import pytz
 
 from logger import setup_logger
 
+DATABASE_NAME = 'belpost_tracker.db'
+
 logger = setup_logger()
 
 
@@ -13,7 +15,7 @@ def create_user(chat_id, username, first_name):
     """Adding new user to DB using data from message."""
 
     try:
-        connection = sqlite3.connect('belpost_tracker.db')
+        connection = sqlite3.connect(DATABASE_NAME)
         cursor = connection.cursor()
 
         cursor.execute(
@@ -53,7 +55,7 @@ def create_user(chat_id, username, first_name):
 def create_track(track, user_id, response_data):
     """Adding track data to DB."""
     try:
-        connection = sqlite3.connect('belpost_tracker.db')
+        connection = sqlite3.connect(DATABASE_NAME)
         cursor = connection.cursor()
 
         cursor.execute(
@@ -102,7 +104,7 @@ def create_track(track, user_id, response_data):
 def update_track_data(track, new_data, is_active):
     """Update track data in DB."""
     try:
-        connection = sqlite3.connect('belpost_tracker.db')
+        connection = sqlite3.connect(DATABASE_NAME)
         cursor = connection.cursor()
 
         serialized_new_data = json.dumps(new_data)
@@ -131,7 +133,7 @@ def update_track_data(track, new_data, is_active):
 def delete_track(track, user_id):
     """Delete track from DB."""
     try:
-        connection = sqlite3.connect('belpost_tracker.db')
+        connection = sqlite3.connect(DATABASE_NAME)
         cursor = connection.cursor()
 
         cursor.execute(
@@ -151,7 +153,7 @@ def delete_track(track, user_id):
 
 def get_value_from_db(text: str) -> list:
     """Return list(data) text value from DB."""
-    connection = sqlite3.connect('belpost_tracker.db')
+    connection = sqlite3.connect(DATABASE_NAME)
     cursor = connection.cursor()
 
     cursor.execute(
@@ -166,7 +168,7 @@ def get_value_from_db(text: str) -> list:
 
 def get_chat_id(text: str):
     """Return chat_id using track."""
-    connection = sqlite3.connect('belpost_tracker.db')
+    connection = sqlite3.connect(DATABASE_NAME)
     cursor = connection.cursor()
 
     cursor.execute(
@@ -179,6 +181,23 @@ def get_chat_id(text: str):
     )
 
     return cursor.fetchone()[0]
+
+
+def check_track_in_db(text: str) -> tuple:
+    """Check track if exist and is_active is False."""
+    connection = sqlite3.connect('belpost_tracker.db')
+    cursor = connection.cursor()
+
+    cursor.execute(
+            'SELECT data FROM tracks WHERE track = ? AND is_active = ?',
+            (text, False)
+    )
+    data = cursor.fetchone()
+
+    if data:
+        return True, json.loads(data[0])
+    else:
+        return False, []
 
 
 def main():

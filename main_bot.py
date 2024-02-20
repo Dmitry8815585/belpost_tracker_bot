@@ -6,7 +6,9 @@ from telegram import Bot
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 from checking import checking
-from db_manager import create_track, create_user, update_track_data
+from db_manager import (
+    check_track_in_db, create_track, create_user, update_track_data
+)
 from logger import setup_logger
 # from belpost_request import get_data
 from test_json import data
@@ -25,7 +27,7 @@ def send_message(chat_id, message):
     bot.send_message(chat_id, message)
 
 
-def send_response_messages(chat_id, response_data):
+def send_response_messages(chat_id: str, response_data: list):
     """Send response messages with data."""
     for i in response_data:
         response_message = (
@@ -57,6 +59,12 @@ def get_status(update, context):
     message = update.message
     chat_id = message.chat_id
     text = (message.text).upper()
+
+    track_exists, track_data = check_track_in_db(text)
+    if track_exists:
+        send_message(chat_id, 'Tracking finished')
+        send_response_messages(chat_id=chat_id, response_data=track_data)
+        return
 
     response_data = data
     # response_data = get_data(text)  # Get data

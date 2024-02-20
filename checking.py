@@ -24,6 +24,16 @@ def send_message(chat_id, message):
     bot.send_message(chat_id, message)
 
 
+def send_new_data_messages(chat_id, response_data):
+    """Send new data to telegram"""
+    response_message = (
+        f"{response_data.get('created_at')}\n"
+        f"{response_data.get('event')}\n"
+        f"{response_data.get('place')}"
+    )
+    send_message(chat_id=chat_id, message=response_message)
+
+
 def checking():
     '''Start checking all active tracks in database.'''
     while True:
@@ -50,7 +60,10 @@ def checking():
                             if request_data[-1].get('event') == 'Вручено':
                                 update_track_data(track, request_data, False)
                                 logger.info(
-                                    f'The parcel {track} has been delivered'
+                                    f'The parcel "{track}" has been delivered'
+                                )
+                                send_new_data_messages(
+                                    chat_id, request_data[-1]
                                 )
                                 send_message(
                                     chat_id=chat_id,
@@ -59,16 +72,19 @@ def checking():
                                         + ' has been delivered'
                                     )
                                 )
+                                send_message(
+                                    chat_id=chat_id, message="\U0001F600"
+                                )
 
                             else:
                                 update_track_data(track, request_data, True)
                                 logger.info(f'Data for {track} has changed')
-                                send_message(
-                                    chat_id=chat_id,
-                                    message=f'Data for {track} has changed'
+                                send_new_data_messages(
+                                    chat_id, request_data[-1]
                                 )
                         else:
                             logger.info(f'No new data for {track}')
+
                         time.sleep(10)
 
                     except Exception as e:
