@@ -1,8 +1,12 @@
-from datetime import datetime
 import json
 import sqlite3
+from datetime import datetime
 
 import pytz
+
+from logger import setup_logger
+
+logger = setup_logger()
 
 
 def create_user(chat_id, username, first_name):
@@ -29,8 +33,19 @@ def create_user(chat_id, username, first_name):
             )
         )
         connection.commit()
+
+        logger.info(f"User {first_name} (@{username}) added successfully.")
     except sqlite3.IntegrityError:
-        pass
+        logger.debug(
+            f"Failed to add user {first_name} (@{username}):"
+            " Chat ID already exists."
+        )
+
+    except Exception as e:
+        logger.error(
+            "An error occurred while adding"
+            f" user {first_name} (@{username}): {e}"
+        )
     finally:
         connection.close()
 
@@ -71,9 +86,13 @@ def create_track(track, user_id, response_data):
             (track, response_data_json, row[0], current_time)
         )
         connection.commit()
+        logger.info(
+            f"The track '{track}' has been successfully added to the database!"
+        )
         return True, "The track has been successfully added to the database!"
 
     except sqlite3.IntegrityError:
+        logger.info(f"Track '{track}' already being tracked!")
         return False, "Track already being tracked!"
 
     finally:
@@ -99,6 +118,7 @@ def update_track_data(track, new_data, is_active):
         )
 
         connection.commit()
+        logger.info(f'Track "{track}" has been updated')
         return True
 
     except sqlite3.IntegrityError:

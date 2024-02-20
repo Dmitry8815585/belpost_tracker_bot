@@ -1,8 +1,8 @@
 import os
 import pprint
-from dotenv import load_dotenv
 
 import requests
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -10,8 +10,8 @@ URL = os.getenv('URL')
 TRACKER = os.getenv('TRACKER')
 
 
-def get_data(tracker):
-    'Get json data file from Belpost'
+def get_data(tracker: str):
+    '''Get json data file from Belpost'''
 
     payload = {
         'number': tracker,

@@ -5,16 +5,19 @@ from dotenv import load_dotenv
 from telegram import Bot
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from db_manager import create_track, create_user, update_track_data
-from belpost_request import get_data
-# from test_json import data
 from checking import checking
+from db_manager import create_track, create_user, update_track_data
+from logger import setup_logger
+# from belpost_request import get_data
+from test_json import data
 
 load_dotenv()
 
 bot = Bot(os.getenv('TOKEN'))
 
 updater = Updater(token=os.getenv('TOKEN'))
+
+logger = setup_logger()
 
 
 def send_message(chat_id, message):
@@ -55,13 +58,14 @@ def get_status(update, context):
     chat_id = message.chat_id
     text = (message.text).upper()
 
-    # response_data = data
-    response_data = get_data(text)  # Get data
+    response_data = data
+    # response_data = get_data(text)  # Get data
 
     if isinstance(response_data, list):
 
         if response_data[-1].get('event') == 'Вручено':
             send_message(chat_id=chat_id, message='Посылка вручена!')
+            logger.info(f'Parsel {text} has been delivered.')
             update_track_data(text, response_data, False)
             send_response_messages(chat_id, response_data)
         else:
@@ -83,7 +87,7 @@ def get_status(update, context):
 updater.dispatcher.add_handler(CommandHandler('start', wake_up))
 updater.dispatcher.add_handler(MessageHandler(Filters.text, get_status))
 
-threading.Thread(target=checking).start()
+threading.Thread(target=checking).start()  # strat checking function
 
 updater.start_polling()
 
