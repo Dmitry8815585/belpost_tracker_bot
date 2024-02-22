@@ -2,16 +2,18 @@ import os
 import threading
 
 from dotenv import load_dotenv
-from telegram import Bot
-from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    CommandHandler, Filters, MessageHandler, Updater, CallbackQueryHandler
+)
 
 from checking import checking
 from db_manager import (
-    check_track_in_db, create_track, create_user, update_track_data
+    check_track_in_db, create_track, create_user, get_value_from_db,
+    list_my_tracks, update_track_data, create_database
 )
 from logger import setup_logger
-# from belpost_request import get_data
-from test_json import data
+from belpost_request import get_data
 
 load_dotenv()
 
@@ -20,6 +22,8 @@ bot = Bot(os.getenv('TOKEN'))
 updater = Updater(token=os.getenv('TOKEN'))
 
 logger = setup_logger()
+
+create_database()
 
 
 def send_message(chat_id, message):
@@ -37,13 +41,40 @@ def send_response_messages(chat_id: str, response_data: list):
         send_message(chat_id=chat_id, message=response_message)
 
 
+def track_selection(update, context):
+    query = update.callback_query
+    track_text = query.data
+    chat_id = query.message.chat_id
+    context.bot.send_message(chat_id, f"You selected track: {track_text}")
+    send_response_messages(chat_id, get_value_from_db(track_text))
+
+
+def list_tracks(update, context):
+    chat_id = update.effective_chat.id
+    value, tracks = list_my_tracks(chat_id)
+    if not value:
+        send_message(chat_id, tracks)
+    else:
+        buttons = []
+        for track_text in tracks:
+            buttons.append(
+                [InlineKeyboardButton(track_text, callback_data=track_text)]
+            )
+        reply_markup = InlineKeyboardMarkup(buttons)
+        context.bot.send_message(
+            chat_id, "Ваши трек-коды:", reply_markup=reply_markup
+        )
+        context.dispatcher.add_handler(CallbackQueryHandler(track_selection))
+
+
 def wake_up(update, context):
     chat = update.effective_chat
     context.bot.send_message(
         chat_id=chat.id,
         text=(
-            'Спасибо, что включили меня\n Отправте мне код Вашей посылки!'
-            '\nПисать буквы можно в любом регистре!'
+            'Спасибо, что включили меня\n'
+            'Отправте мне код-трек Вашей посылки!\n'
+            'Буквы могут быть в любом регистре!'
         )
     )
     message = update.message
@@ -56,18 +87,18 @@ def wake_up(update, context):
 
 
 def get_status(update, context):
+    """Main function."""
     message = update.message
     chat_id = message.chat_id
     text = (message.text).upper()
 
     track_exists, track_data = check_track_in_db(text)
     if track_exists:
-        send_message(chat_id, 'Tracking finished')
+        send_message(chat_id, 'Отслеживание завершено.')
         send_response_messages(chat_id=chat_id, response_data=track_data)
         return
 
-    response_data = data
-    # response_data = get_data(text)  # Get data
+    response_data = get_data(text)  # Get data
 
     if isinstance(response_data, list):
 
@@ -93,6 +124,7 @@ def get_status(update, context):
 
 
 updater.dispatcher.add_handler(CommandHandler('start', wake_up))
+updater.dispatcher.add_handler(CommandHandler('list', list_tracks))
 updater.dispatcher.add_handler(MessageHandler(Filters.text, get_status))
 
 threading.Thread(target=checking).start()  # strat checking function
