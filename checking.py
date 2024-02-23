@@ -16,7 +16,7 @@ load_dotenv()
 
 bot = Bot(os.getenv('TOKEN'))
 
-REQUEST_TIME_DELAY = 120
+REQUEST_TIME_DELAY = 1800
 TIME_DELAY_BETWEEN_TRACKS = 10
 
 logger = setup_logger()
