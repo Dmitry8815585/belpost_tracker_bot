@@ -1,8 +1,10 @@
 # Проект: Телеграм-бот для отслеживания посылок
 
-## Стек навыков проекта "homework_bot"
+## Telegram:@belpost_tracker_status_bot
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![Telegram API](https://img.shields.io/badge/Telegram_API-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ![Logging](https://img.shields.io/badge/Logging-292929?style=for-the-badge&logo=logging&logoColor=white) ![API Requests](https://img.shields.io/badge/API_Requests-009688?style=for-the-badge&logo=requests&logoColor=white)![Docker](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+## Стек навыков проекта:
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![Telegram API](https://img.shields.io/badge/Telegram_API-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ![Logging](https://img.shields.io/badge/Logging-292929?style=for-the-badge&logo=logging&logoColor=white) ![API Requests](https://img.shields.io/badge/API_Requests-009688?style=for-the-badge&logo=requests&logoColor=white)![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 
 ## Описание проекта
@@ -14,7 +16,7 @@
 
 1. Подключитесь к боту, отправив команду /start.
 2. Бот запросит у вас трек-код для отслеживания посылки.
-3. Вы можете отправить один или несколько трек-кодов, разделив их пробелом.
+3. Вы можете отправить один или несколько трек-кодов.
 4. Бот сохранит трек-коды в базу данных SQLite.
 5. Бот будет периодически проверять статус посылок.
 6. Когда посылка будет доставлена, вы получите сообщение о ее статусе.
