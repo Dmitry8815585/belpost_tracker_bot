@@ -1,6 +1,4 @@
-.env
 venv/
-
 test_json.py
 deleter.py
 belpost_tracker.db
