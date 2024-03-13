@@ -1,4 +1,4 @@
 version: '3'
 services:
   telbot:
-    image: dockerbot:latest
+    image: trackbot:latest
