@@ -1,6 +1,6 @@
 # Проект: Телеграм-бот для отслеживания посылок
 
-## Telegram:@belpost_tracker_status_bot
+##  [Статус посылки Белпочты бот](https://t.me/belpost_tracker_status_bot)
 
 ## Стек навыков проекта:
 
